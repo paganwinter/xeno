@@ -23,19 +23,19 @@ app.addRoute({
   method: 'get',
   url: '/',
   async handler(ctx) {
-    ctx.res.body = { hello: 'world' };
+    ctx.res.status = 418;
+    ctx.res.headers = {
+      'powered-by': 'xeno',
+    };
+    ctx.res.body = ctx.req;
   },
 });
 
 app.addRoute({
   method: 'get',
   url: '/test',
-  async handler(ctx) {
-    ctx.res.status = 418;
-    ctx.res.headers = {
-      'powered-by': 'xeno',
-    };
-    ctx.res.body = 'test';
+  async handler() {
+    // do nothing
   },
 });
 
@@ -44,7 +44,7 @@ app.addRoute({
   url: '/accounts',
   async handler(ctx) {
     ctx.res.status = 201;
-    console.log(ctx.req.body);
+    ctx.res.body = ctx.req.body;
   },
 });
 

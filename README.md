@@ -1,11 +1,18 @@
 # Xeno
 
+- [Xeno](#xeno)
+  - [Install](#install)
+  - [Usage](#usage)
+    - [Start](#start)
+    - [Access](#access)
+
 ## Install
 ```bash
 npm i git@github.service.anz:parasurv/xeno.git
 ```
 
 ## Usage
+### Start
 ```js
 const http = require('http');
 
@@ -31,7 +38,7 @@ app.addRoute({
   async handler(ctx) {
     ctx.res.status = 418;
     ctx.res.headers = { 'powered-by': 'xeno' };
-    ctx.res.body = { hello: 'world' };
+    ctx.res.body = ctx.req;
   },
 });
 
@@ -39,10 +46,18 @@ app.addRoute({
   method: 'post',
   url: '/',
   async handler(ctx) {
-    ctx.res.body = ctx.req.body;
   },
 });
 
 const server = http.createServer(app.getHandler());
 server.listen(3000, () => { console.log('server started'); });
+```
+
+### Access
+```bash
+curl --location --request GET 'localhost:3000'
+
+curl --location --request POST 'localhost:3000' \
+--header 'Content-Type: application/json' \
+--data-raw '{ "hello": "world" }'
 ```
