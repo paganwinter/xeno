@@ -21,22 +21,28 @@ Create an app instance.
 const app = new Xeno();
 ```
 
-#### `app.addRoute(method, url, handler)`:
+##### `app.addRoute(method, url, handler)`:
 Add a route to the application.<br />
 
-#### `app.onRequest(handler)`: Add a handler for `request received` event
+##### `app.onRequest(handler)`
+Add a handler for `request received` event
 
-#### `app.onParse(handler)`: Add a handler for `request parsed` event
+##### `app.onParse(handler)`
+Add a handler for `request parsed` event
 
-#### `app.onRoute(handler)`: Add a handler for `route identified` event
+##### `app.onRoute(handler)`:
+Add a handler for `route identified` event
 
-#### `app.onResponse(handler)`: Add a handler for `response sent` event
+##### `app.onResponse(handler)`:
+Add a handler for `response sent` event
 
-#### `app.start(<http(s) module>, <http(s) opts>, port, callback)`
+##### `app.start(<http(s) module>, <http(s) opts>, port, callback)`
+Start the server
 
-#### `handler(ctx)`: handler signature
+##### `Handler signature`
+Handlers are called with a `ctx` object.
 
-#### `ctx` shape:
+##### `ctx`:
 ```js
 ctx = {
   req: {
