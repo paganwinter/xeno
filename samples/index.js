@@ -6,7 +6,7 @@ const Xeno = require('..');
 
 const app = new Xeno();
 
-app.onRequest((ctx) => {
+app.onParse((ctx) => {
   console.log(ctx.req);
   console.log(ctx.req.method, ctx.req.url);
 });
@@ -56,9 +56,24 @@ app.addRoute({
   },
 });
 
+app.addRoute({
+  method: 'get',
+  url: '/accounts/:id/txns/:txns',
+  async handler(ctx) {
+    ctx.res.body = ctx.req.params;
+  },
+});
 
-const server = http.createServer(app.getHandler());
-server.listen(3000, (...args) => {
+app.addRoute({
+  method: 'get',
+  url: '/test/*',
+  async handler(ctx) {
+    ctx.res.body = 'I am /test/*';
+  },
+});
+
+
+app.start(http, {}, 3000, (...args) => {
   console.log('server started');
   console.log(...args);
 });
