@@ -21,7 +21,7 @@ Create an app instance.
 const app = new Xeno();
 ```
 
-##### `app.addRoute(method, url, handler)`:
+##### `app.addRoute({ method, url, handler })`:
 Add a route to the application.<br />
 
 ##### `app.onRequest(handler)`
