@@ -4,6 +4,7 @@
   - [Install](#install)
   - [Usage](#usage)
     - [API](#api)
+      - [`Xeno`](#xeno-1)
 
 ## Install
 ```bash
@@ -14,20 +15,42 @@ npm i git@github.service.anz:parasurv/xeno.git
 Check [samples](/samples) for usage.
 
 ### API
+#### `Xeno`
+Create an app instance.
 ```js
 const app = new Xeno();
 ```
-Create an app instance.
 
-`app.addRoute(method, url, handler)`: Add a route to the application.
+#### `app.addRoute(method, url, handler)`:
+Add a route to the application.<br />
 
-`app.onRequest(handler)`: Add a handler for `request received` event
+#### `app.onRequest(handler)`: Add a handler for `request received` event
 
-`app.onParse(handler)`: Add a handler for on `request parsed` event
+#### `app.onParse(handler)`: Add a handler for `request parsed` event
 
-`app.onRoute(handler)`: Add a handler for `route identified` event
+#### `app.onRoute(handler)`: Add a handler for `route identified` event
 
-`app.onResponse(handler)`: Add a handler for `response sent` event
+#### `app.onResponse(handler)`: Add a handler for `response sent` event
 
-`app.start(<http(s) module>, <http(s) opts>, port, callback)`
+#### `app.start(<http(s) module>, <http(s) opts>, port, callback)`
 
+#### `handler(ctx)`: handler signature
+
+#### `ctx` shape:
+```js
+ctx = {
+  req: {
+    method: String,
+    url: String,
+    query: Object,
+    params: Object,
+    headers: Object,
+    body: [Object | String],
+  },
+  res: {
+    status: Number,
+    headers: Object,
+    body: [Object | String | Buffer | Stream],
+  },
+}
+```
