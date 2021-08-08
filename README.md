@@ -3,8 +3,7 @@
 - [Xeno](#xeno)
   - [Install](#install)
   - [Usage](#usage)
-    - [Start](#start)
-    - [Access](#access)
+    - [API](#api)
 
 ## Install
 ```bash
@@ -12,52 +11,23 @@ npm i git@github.service.anz:parasurv/xeno.git
 ```
 
 ## Usage
-### Start
+Check [samples](/samples) for usage.
+
+### API
 ```js
-const http = require('http');
-
-const Xeno = require('xeno');
-
 const app = new Xeno();
-
-app.onRequest((ctx) => {
-  console.log(ctx.req.method, ctx.req.url);
-});
-
-app.onRoute((ctx) => {
-  console.log('found route', ctx.route);
-});
-
-app.onResponse((ctx) => {
-  console.log(ctx.res.status);
-});
-
-app.addRoute({
-  method: 'get',
-  url: '/',
-  async handler(ctx) {
-    ctx.res.status = 418;
-    ctx.res.headers = { 'powered-by': 'xeno' };
-    ctx.res.body = ctx.req;
-  },
-});
-
-app.addRoute({
-  method: 'post',
-  url: '/',
-  async handler(ctx) {
-  },
-});
-
-const server = http.createServer(app.getHandler());
-server.listen(3000, () => { console.log('server started'); });
 ```
+Create an app instance.
 
-### Access
-```bash
-curl --location --request GET 'localhost:3000'
+`app.addRoute(method, url, handler)`: Add a route to the application.
 
-curl --location --request POST 'localhost:3000' \
---header 'Content-Type: application/json' \
---data-raw '{ "hello": "world" }'
-```
+`app.onRequest(handler)`: Add a handler for `request received` event
+
+`app.onParse(handler)`: Add a handler for on `request parsed` event
+
+`app.onRoute(handler)`: Add a handler for `route identified` event
+
+`app.onResponse(handler)`: Add a handler for `response sent` event
+
+`app.start(<http(s) module>, <http(s) opts>, port, callback)`
+
