@@ -12,6 +12,9 @@
   "keywords": [],
   "author": "Vaid",
   "license": "ISC",
+  "dependencies": {
+    "find-my-way": "^4.3.3"
+  },
   "devDependencies": {
     "chai": "^4.3.4",
     "chai-http": "^4.3.0",

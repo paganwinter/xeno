@@ -9,13 +9,10 @@ describe('', () => {
   const app = new Xeno();
   before(() => {
     app.addRoute({
-      method: 'get',
       url: '/',
       async handler(ctx) {
-        ctx.res.status = 200;
-        ctx.res.headers = {
-          'powered-by': 'xeno',
-        };
+        ctx.res.status(200);
+        ctx.res.header('powered-by', 'xeno');
         ctx.res.body = {
           req: ctx.req,
         };
@@ -25,10 +22,8 @@ describe('', () => {
       method: 'post',
       url: '/',
       async handler(ctx) {
-        ctx.res.status = 200;
-        ctx.res.headers = {
-          'powered-by': 'xeno',
-        };
+        ctx.res.status(200);
+        ctx.res.header('powered-by', 'xeno');
         ctx.res.body = {
           req: ctx.req,
         };
@@ -38,10 +33,8 @@ describe('', () => {
       method: 'get',
       url: '/accounts/:acctId',
       async handler(ctx) {
-        ctx.res.status = 200;
-        ctx.res.headers = {
-          'powered-by': 'xeno',
-        };
+        ctx.res.status(200);
+        ctx.res.header('powered-by', 'xeno');
         ctx.res.body = {
           req: ctx.req,
         };
@@ -51,10 +44,8 @@ describe('', () => {
       method: 'get',
       url: '/accounts/:acctId/transactions/:txnId',
       async handler(ctx) {
-        ctx.res.status = 200;
-        ctx.res.headers = {
-          'powered-by': 'xeno',
-        };
+        ctx.res.status(200);
+        ctx.res.header('powered-by', 'xeno');
         ctx.res.body = {
           req: ctx.req,
         };
@@ -97,14 +88,17 @@ describe('', () => {
     });
   });
 
-  describe('POST static path', () => {
+  describe('GET dynamic path', () => {
     it('', async () => {
-      const method = 'post';
-      const url = '/';
-      const params = undefined;
+      const method = 'get';
+      const url = '/accounts/123/transactions/456';
+      const params = {
+        acctId: '123',
+        txnId: '456',
+      };
       const query = { type: 'something', limit: '100' };
       const headers = { authorization: 'Bearer' };
-      const body = { hello: 'world' };
+      const body = undefined;
 
       const request = chai.request(app.getHandler())[`${method}`](url);
       if (query) request.query(query);
@@ -112,7 +106,7 @@ describe('', () => {
       if (body) request.send(body);
 
       const result = await request;
-      // console.log((result.status, result.headers, result.body));
+      // console.log(result.status, result.headers, result.body);
 
       expect(result.status).to.equal(200);
 
@@ -132,17 +126,14 @@ describe('', () => {
     });
   });
 
-  describe('GET dynamic path', () => {
+  describe('POST static path', () => {
     it('', async () => {
-      const method = 'get';
-      const url = '/accounts/123/transactions/456';
-      const params = {
-        acctId: '123',
-        txnId: '456',
-      };
+      const method = 'post';
+      const url = '/';
+      const params = undefined;
       const query = { type: 'something', limit: '100' };
       const headers = { authorization: 'Bearer' };
-      const body = undefined;
+      const body = { hello: 'world' };
 
       const request = chai.request(app.getHandler())[`${method}`](url);
       if (query) request.query(query);
