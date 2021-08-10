@@ -5,7 +5,7 @@ const Xeno = require('../..');
 
 const { expect } = chai;
 
-describe('', () => {
+describe('integration tests', () => {
   const app = new Xeno();
   before(() => {
     app.addRoute({
