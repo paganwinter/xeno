@@ -54,9 +54,9 @@ ctx = {
     body: [Object | String],
   },
   res: {
-    status: Number,
-    headers: Object,
-    body: [Object | String | Buffer | Stream],
+    status(Number), // set reponse status code
+    header(String, String), // set response header name and value
+    body: [Object | String | Buffer | Stream], // set response body
   },
 }
 ```
