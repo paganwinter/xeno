@@ -6,10 +6,10 @@ Super Minimal NodeJS Web Server Framework
   - [Usage](#usage)
     - [API](#api)
       - [`Xeno`](#xeno-1)
-        - [`app.addRoute({ method, url, handler, config })`:](#appaddroute-method-url-handler-config-)
-        - [`app.start(<http(s) module>, <http(s) opts>, port, callback)`](#appstarthttps-module-https-opts-port-callback)
-        - [`Handler signature`](#handler-signature)
-        - [`ctx`:](#ctx)
+      - [`app.addRoute({ method, url, handler, config })`:](#appaddroute-method-url-handler-config-)
+      - [`app.start(<http(s) module>, <http(s) opts>, port, callback)`](#appstarthttps-module-https-opts-port-callback)
+      - [`Handler signature`](#handler-signature)
+      - [`ctx`:](#ctx)
 
 ## Install
 ```bash
@@ -26,33 +26,33 @@ Create an app instance.
 const app = new Xeno();
 ```
 
-##### `app.addRoute({ method, url, handler, config })`:
+#### `app.addRoute({ method, url, handler, config })`:
 Add a route to the application.<br />
 
 <!--
-##### `app.onRequest(handler)`
+#### `app.onRequest(handler)`
 Add a handler for `request received` event
 
-##### `app.onParse(handler)`
+#### `app.onParse(handler)`
 Add a handler for `request parsed` event
 
-##### `app.onRoute(handler)`:
+#### `app.onRoute(handler)`:
 Add a handler for `route identified` event
 
-##### `app.onSend(handler)`:
+#### `app.onSend(handler)`:
 Add a handler for `sending response` event
 
-##### `app.onResponse(handler)`:
+#### `app.onResponse(handler)`:
 Add a handler for `response sent` event
 -->
 
-##### `app.start(<http(s) module>, <http(s) opts>, port, callback)`
+#### `app.start(<http(s) module>, <http(s) opts>, port, callback)`
 Start the server
 
-##### `Handler signature`
+#### `Handler signature`
 Handlers are called with a `ctx` object.
 
-##### `ctx`:
+#### `ctx`:
 ```js
 ctx = {
   req: {
