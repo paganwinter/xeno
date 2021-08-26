@@ -6,17 +6,36 @@ const Xeno = require('..');
 
 const app = new Xeno();
 
-app.onParse((ctx) => {
-  console.log(ctx.req);
-  console.log(ctx.req.method, ctx.req.url);
-});
+// app.onRequest((ctx) => {
+//   console.log('recevied request and created ctx');
+// });
 
-app.onRoute((ctx) => {
-  console.log('found route', ctx.route);
-});
+// app.onParse((ctx) => {
+//   console.log('request parsed');
+//   console.log(ctx.req);
+//   console.log(ctx.req.method, ctx.req.url);
+// });
 
-app.onResponse((ctx) => {
-  console.log(ctx.res.status);
+// app.onRoute((ctx) => {
+//   console.log('route idetified');
+//   console.log('found route', ctx.req.route);
+// });
+
+// app.onSend((ctx) => {
+//   console.log('response to be sent');
+// });
+
+// app.onResponse((ctx) => {
+//   console.log('response sent');
+//   console.log(ctx.res.status);
+// });
+
+
+app.addRoute({
+  url: '/minimal',
+  async handler() {
+    // do nothing
+  },
 });
 
 app.addRoute({
@@ -24,16 +43,13 @@ app.addRoute({
   async handler(ctx) {
     ctx.res.status(418);
     ctx.res.header('powered-by', 'xeno');
+    ctx.res.headers({
+      'x-b3-traceid': '1234',
+      'powered-by': 'xeno', // overrides earlier one
+    });
     ctx.res.body = ctx.req;
   },
-  config: { hello: 'world' },
-});
-
-app.addRoute({
-  url: '/test',
-  async handler() {
-    // do nothing
-  },
+  config: { hello: 'world' }, // available in ctx.req.route
 });
 
 app.addRoute({
