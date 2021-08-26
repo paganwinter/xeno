@@ -13,7 +13,7 @@
   "author": "Vaid",
   "license": "ISC",
   "dependencies": {
-    "find-my-way": "^4.3.3"
+    "debug": "^4.3.2"
   },
   "devDependencies": {
     "chai": "^4.3.4",

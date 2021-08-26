@@ -6,158 +6,80 @@ const Xeno = require('../..');
 const { expect } = chai;
 
 describe('integration tests', () => {
-  const app = new Xeno();
-  before(() => {
-    app.addRoute({
-      url: '/',
-      async handler(ctx) {
-        ctx.res.status(200);
-        ctx.res.header('powered-by', 'xeno');
-        ctx.res.body = {
-          req: ctx.req,
-        };
-      },
-    });
-    app.addRoute({
-      method: 'post',
-      url: '/',
-      async handler(ctx) {
-        ctx.res.status(200);
-        ctx.res.header('powered-by', 'xeno');
-        ctx.res.body = {
-          req: ctx.req,
-        };
-      },
-    });
-    app.addRoute({
-      method: 'get',
-      url: '/accounts/:acctId',
-      async handler(ctx) {
-        ctx.res.status(200);
-        ctx.res.header('powered-by', 'xeno');
-        ctx.res.body = {
-          req: ctx.req,
-        };
-      },
-    });
-    app.addRoute({
-      method: 'get',
-      url: '/accounts/:acctId/transactions/:txnId',
-      async handler(ctx) {
-        ctx.res.status(200);
-        ctx.res.header('powered-by', 'xeno');
-        ctx.res.body = {
-          req: ctx.req,
-        };
-      },
-    });
-  });
-
-  describe('GET static path', () => {
-    it('', async () => {
-      const method = 'get';
-      const url = '/';
-      const params = undefined;
-      const query = { type: 'something', limit: '100' };
-      const headers = { authorization: 'Bearer' };
-      const body = undefined;
-
-      const request = chai.request(app.getHandler())[`${method}`](url);
-      if (query) request.query(query);
-      if (headers) Object.entries((hdr, val) => request.set(hdr, val));
-      if (body) request.send(body);
-
+  describe('', () => {
+    it('most basic route without method and empty handler', async () => {
+      const app = new Xeno();
+      app.addRoute({
+        url: '/test',
+        async handler() { /**/ },
+      });
+      const request = chai.request(app.getHandler()).get('/test');
       const result = await request;
-      // console.log((result.status, result.headers, result.body));
-
       expect(result.status).to.equal(200);
-
-      expect(result.headers).to.haveOwnProperty('powered-by', 'xeno');
-      expect(result.headers).to.haveOwnProperty('content-type', 'application/json');
-
-      expect(result.body.req).to.haveOwnProperty('method', method);
-      expect(result.body.req).to.haveOwnProperty('url', url);
-      if (params) expect(result.body.req.params).to.deep.equal(params);
-      if (query) expect(result.body.req).to.deep.haveOwnProperty('query', query);
-      if (headers) {
-        Object.entries((hdr, val) => {
-          expect(result.body.req.headers).to.haveOwnProperty(hdr, val);
-        });
-      }
-      if (body) expect(result.body.req.body).to.deep.equal(body);
+      expect(result.text).to.equal('');
     });
-  });
 
-  describe('GET dynamic path', () => {
-    it('', async () => {
-      const method = 'get';
-      const url = '/accounts/123/transactions/456';
-      const params = {
-        acctId: '123',
-        txnId: '456',
-      };
-      const query = { type: 'something', limit: '100' };
-      const headers = { authorization: 'Bearer' };
-      const body = undefined;
-
-      const request = chai.request(app.getHandler())[`${method}`](url);
-      if (query) request.query(query);
-      if (headers) Object.entries((hdr, val) => request.set(hdr, val));
-      if (body) request.send(body);
-
+    it('simple route returning status, headers, and body', async () => {
+      const app = new Xeno();
+      app.addRoute({
+        method: 'GET',
+        url: '/test',
+        async handler(ctx) {
+          ctx.res.status(418);
+          ctx.res.header('x-powered-by', 'xeno');
+          ctx.res.body = { hello: 'world' };
+        },
+      });
+      const request = chai.request(app.getHandler())
+        .get('/test');
       const result = await request;
-      // console.log(result.status, result.headers, result.body);
-
-      expect(result.status).to.equal(200);
-
-      expect(result.headers).to.haveOwnProperty('powered-by', 'xeno');
-      expect(result.headers).to.haveOwnProperty('content-type', 'application/json');
-
-      expect(result.body.req).to.haveOwnProperty('method', method);
-      expect(result.body.req).to.haveOwnProperty('url', url);
-      if (params) expect(result.body.req.params).to.deep.equal(params);
-      if (query) expect(result.body.req).to.deep.haveOwnProperty('query', query);
-      if (headers) {
-        Object.entries((hdr, val) => {
-          expect(result.body.req.headers).to.haveOwnProperty(hdr, val);
-        });
-      }
-      if (body) expect(result.body.req.body).to.deep.equal(body);
+      expect(result.status).to.equal(418);
+      expect(result.headers['x-powered-by']).to.equal('xeno');
+      expect(result.body).to.deep.equal({ hello: 'world' });
     });
-  });
 
-  describe('POST static path', () => {
-    it('', async () => {
-      const method = 'post';
-      const url = '/';
-      const params = undefined;
-      const query = { type: 'something', limit: '100' };
-      const headers = { authorization: 'Bearer' };
-      const body = { hello: 'world' };
-
-      const request = chai.request(app.getHandler())[`${method}`](url);
-      if (query) request.query(query);
-      if (headers) Object.entries((hdr, val) => request.set(hdr, val));
-      if (body) request.send(body);
-
+    it('route returning ctx.req', async () => {
+      const app = new Xeno();
+      app.addRoute({
+        method: 'GET',
+        url: '/test/:testId',
+        async handler(ctx) {
+          const { req } = ctx;
+          ctx.res.body = { req };
+        },
+        config: { some: 'metadata' },
+      });
+      const request = chai.request(app.getHandler())
+        .get('/test/123?limit=100&type=some')
+        .set('authorization', 'Bearer');
       const result = await request;
-      // console.log((result.status, result.headers, result.body));
+      expect(result.body.req.method).to.equal('get');
+      expect(result.body.req.originalUrl).to.equal('/test/123?limit=100&type=some');
+      expect(result.body.req.uri).to.equal('/test/123');
+      expect(result.body.req.url).to.equal('/test/123');
+      expect(result.body.req.path).to.equal('/test/123');
+      expect(result.body.req.query).to.deep.equal({ limit: '100', type: 'some' });
+      expect(result.body.req.params).to.deep.equal({ testId: '123' });
+      expect(result.body.req.headers.authorization).to.equal('Bearer');
+      expect(result.body.req.route).to.deep.equal({ method: 'GET', path: '/test/:testId', config: { some: 'metadata' } });
+      expect(result.body.req.body).to.equal(undefined);
+    });
 
-      expect(result.status).to.equal(200);
-
-      expect(result.headers).to.haveOwnProperty('powered-by', 'xeno');
-      expect(result.headers).to.haveOwnProperty('content-type', 'application/json');
-
-      expect(result.body.req).to.haveOwnProperty('method', method);
-      expect(result.body.req).to.haveOwnProperty('url', url);
-      if (params) expect(result.body.req.params).to.deep.equal(params);
-      if (query) expect(result.body.req).to.deep.haveOwnProperty('query', query);
-      if (headers) {
-        Object.entries((hdr, val) => {
-          expect(result.body.req.headers).to.haveOwnProperty(hdr, val);
-        });
-      }
-      if (body) expect(result.body.req.body).to.deep.equal(body);
+    it('route returning ctx.req.body', async () => {
+      const app = new Xeno();
+      app.addRoute({
+        method: 'POST',
+        url: '/test',
+        async handler(ctx) {
+          const { body } = ctx.req;
+          ctx.res.body = { body };
+        },
+      });
+      const request = chai.request(app.getHandler())
+        .post('/test')
+        .send({ hello: 'world' });
+      const result = await request;
+      expect(result.body.body).to.deep.equal({ hello: 'world' });
     });
   });
 });

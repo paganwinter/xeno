@@ -26,6 +26,7 @@ app.addRoute({
     ctx.res.header('powered-by', 'xeno');
     ctx.res.body = ctx.req;
   },
+  config: { hello: 'world' },
 });
 
 app.addRoute({
@@ -45,23 +46,24 @@ app.addRoute({
 });
 
 app.addRoute({
-  url: '/accounts/:id',
+  url: '/accounts/:acctId',
   async handler(ctx) {
     ctx.res.body = ctx.req.params;
   },
 });
 
 app.addRoute({
-  url: '/accounts/:id/txns/:txns',
+  url: '/accounts/:acctId/txns/:txns',
   async handler(ctx) {
     ctx.res.body = ctx.req.params;
   },
 });
 
 app.addRoute({
-  url: '/test/*',
+  method: ['get', 'post'],
+  url: '/proxy/*all',
   async handler(ctx) {
-    ctx.res.body = 'I am /test/*';
+    ctx.res.body = `I am a proxy for ${ctx.req.method} ${ctx.req.url}`;
   },
 });
 
