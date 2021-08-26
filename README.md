@@ -5,6 +5,10 @@
   - [Usage](#usage)
     - [API](#api)
       - [`Xeno`](#xeno-1)
+        - [`app.addRoute({ method, url, handler, config })`:](#appaddroute-method-url-handler-config-)
+        - [`app.start(<http(s) module>, <http(s) opts>, port, callback)`](#appstarthttps-module-https-opts-port-callback)
+        - [`Handler signature`](#handler-signature)
+        - [`ctx`:](#ctx)
 
 ## Install
 ```bash
@@ -21,9 +25,10 @@ Create an app instance.
 const app = new Xeno();
 ```
 
-##### `app.addRoute({ method, url, handler })`:
+##### `app.addRoute({ method, url, handler, config })`:
 Add a route to the application.<br />
 
+<!--
 ##### `app.onRequest(handler)`
 Add a handler for `request received` event
 
@@ -38,6 +43,7 @@ Add a handler for `sending response` event
 
 ##### `app.onResponse(handler)`:
 Add a handler for `response sent` event
+-->
 
 ##### `app.start(<http(s) module>, <http(s) opts>, port, callback)`
 Start the server
