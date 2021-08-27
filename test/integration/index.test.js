@@ -58,7 +58,6 @@ describe('integration tests', () => {
       expect(result.body.req.originalUrl).to.equal('/test/123?limit=100&type=some');
       expect(result.body.req.uri).to.equal('/test/123');
       expect(result.body.req.url).to.equal('/test/123');
-      expect(result.body.req.path).to.equal('/test/123');
       expect(result.body.req.query).to.deep.equal({ limit: '100', type: 'some' });
       expect(result.body.req.params).to.deep.equal({ testId: '123' });
       expect(result.body.req.headers.authorization).to.equal('Bearer');
@@ -80,6 +79,106 @@ describe('integration tests', () => {
         .get('/test');
       const result = await request;
       expect(result.body.body).to.deep.equal(undefined);
+    });
+
+    it('post json data', async () => {
+      const app = new Xeno();
+      app.addRoute({
+        method: 'POST',
+        url: '/test',
+        async handler(ctx) {
+          const { body } = ctx.req;
+          ctx.res.body = { body };
+        },
+      });
+      const request = chai.request(app.getHandler())
+        .post('/test')
+        .set('content-type', 'application/json')
+        .send({ hello: 'world' });
+      const result = await request;
+      expect(result.body.body).to.deep.equal({ hello: 'world' });
+    });
+
+    it('post text data', async () => {
+      const app = new Xeno();
+      app.addRoute({
+        method: 'POST',
+        url: '/test',
+        async handler(ctx) {
+          const { body } = ctx.req;
+          ctx.res.body = { body };
+        },
+      });
+      const request = chai.request(app.getHandler())
+        .post('/test')
+        .set('content-type', 'text/plain')
+        .send('hello world');
+      const result = await request;
+      expect(result.body.body).to.deep.equal('hello world');
+    });
+
+    it('post form data', async () => {
+      const app = new Xeno();
+      app.addRoute({
+        method: 'POST',
+        url: '/test',
+        async handler(ctx) {
+          const { body } = ctx.req;
+          ctx.res.body = { body };
+        },
+      });
+      const request = chai.request(app.getHandler())
+        .post('/test')
+        .set('content-type', 'application/x-www-form-urlencoded')
+        .send('hello=world');
+      const result = await request;
+      expect(result.body.body).to.deep.equal({ hello: 'world' });
+    });
+
+    it('handles errors by default', async () => {
+      const app = new Xeno();
+      app.addRoute({
+        method: 'GET',
+        url: '/test',
+        async handler() {
+          const err = new Error('Uh oh');
+          err.status = 501;
+          throw err;
+        },
+      });
+      const request = chai.request(app.getHandler())
+        .get('/test');
+      const result = await request;
+      expect(result.status).to.equal(501);
+      expect(result.text).to.equal('Uh oh');
+    });
+
+    it('handles 404', async () => {
+      const app = new Xeno();
+      app.addRoute({
+        method: 'GET',
+        url: '/test',
+        async handler() { /**/ },
+      });
+      const request = chai.request(app.getHandler())
+        .get('/invalid');
+      const result = await request;
+      expect(result.status).to.equal(404);
+      expect(result.text).to.equal('Not Found');
+    });
+
+    it('handles 405', async () => {
+      const app = new Xeno();
+      app.addRoute({
+        method: 'GET',
+        url: '/test',
+        async handler() { /**/ },
+      });
+      const request = chai.request(app.getHandler())
+        .delete('/test');
+      const result = await request;
+      expect(result.status).to.equal(405);
+      expect(result.text).to.equal('Method Not Allowed');
     });
   });
 });
