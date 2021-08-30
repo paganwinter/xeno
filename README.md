@@ -31,7 +31,7 @@ const app = new Xeno(options);
 `options`
 ```js
 {
-  errorHandler: async (err, ctx) => {} // function that will be called when any error occurs
+  errorHandler: async (err, ctx) => {} // async function that will be called when any error occurs
 }
 ```
 
@@ -43,7 +43,7 @@ Add a route to the application.
 {
   method: 'post', // defaults to get when not provided
   url :'test/:testId', // suppports `/static`, `/dynamic/:param`, `/wildcard*`
-  handler: async (ctx) => {}, // async handler function executed on route
+  handler: async (ctx) => {}, // optional async handler function executed on route
   some: 'route metadata', // arbitrary metadata to add to `ctx.req.route`
   other: 'property',
 }
