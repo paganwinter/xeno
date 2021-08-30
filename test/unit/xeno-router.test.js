@@ -61,8 +61,8 @@ describe('router', () => {
       if (!t.error) {
         it(`${t.method} ${t.testPath} => ${t.path}`, () => {
           const result = r.find(t.method, t.testPath);
-          expect(result.method).to.equal(t.method);
-          expect(result.path).to.equal(t.path);
+          expect(result.route.method).to.equal(t.method);
+          expect(result.route.path).to.equal(t.path);
           // expect(result.route).to.deep.equal({ method: t.method, path: t.path });
         });
       } else {
@@ -114,10 +114,10 @@ describe('router', () => {
 
     it('', () => {
       const result = r.find('GET', '/test/123');
-      expect(result.method).to.equal('GET');
-      expect(result.path).to.equal('/test/:testId');
+      expect(result.route.method).to.equal('GET');
+      expect(result.route.path).to.equal('/test/:testId');
+      expect(result.route.hello).to.deep.equal('world');
       expect(result.params).to.deep.equal({ testId: '123' });
-      expect(result.data).to.deep.equal(data);
     });
   });
 });

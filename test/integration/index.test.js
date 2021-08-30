@@ -1,3 +1,4 @@
+/* eslint-disable max-lines-per-function */
 const chai = require('chai');
 chai.use(require('chai-http'));
 
@@ -6,7 +7,7 @@ const Xeno = require('../..');
 const { expect } = chai;
 
 describe('integration tests', () => {
-  describe('', () => {
+  describe('application', () => {
     it('most basic route without method and empty handler', async () => {
       const app = new Xeno();
       app.addRoute({
@@ -65,7 +66,7 @@ describe('integration tests', () => {
       expect(result.body.req.body).to.deep.equal({ hello: 'world' });
     });
 
-    it('route without body', async () => {
+    it('route without request body', async () => {
       const app = new Xeno();
       app.addRoute({
         method: 'GET',
@@ -179,6 +180,212 @@ describe('integration tests', () => {
       const result = await request;
       expect(result.status).to.equal(405);
       expect(result.text).to.equal('Method Not Allowed');
+    });
+  });
+
+  describe('errorHandler', () => {
+    it('calls error handler', async () => {
+      const app = new Xeno({
+        async errorHandler(err, ctx) {
+          ctx.res.status(510);
+          ctx.res.body = 'formatted error';
+        },
+      });
+      app.addRoute({
+        url: '/test',
+        async handler() {
+          const err = new Error('Uh oh');
+          err.status = 501;
+          throw err;
+        },
+      });
+
+      const request = (await chai.request(app.getHandler()).get('/test'));
+      const result = await request;
+      expect(result.status).to.equal(510);
+      expect(result.text).to.equal('formatted error');
+    });
+  });
+
+  describe('hooks', () => {
+    it('throws for invalid hooks', async () => {
+      const app = new Xeno();
+      function wrap() {
+        app.addHook('onInvalid', async () => {
+        });
+      }
+      expect(wrap).to.throw('Unknown hook onInvalid');
+    });
+
+    it('runs onRequest Hooks', async () => {
+      const app = new Xeno();
+      app.addHook('onRequest', async (ctx) => {
+        ctx.req.data = {};
+        ctx.req.data.query = ctx.req.query;
+        ctx.req.data.body = ctx.req.body;
+        ctx.req.data.hooks = [];
+      });
+      app.addHook('onRequest', async (ctx) => {
+        ctx.req.data.hooks.push('hook 1');
+      });
+      app.addHook('onRequest', async (ctx) => {
+        ctx.req.data.hooks.push('hook 2');
+      });
+      app.addRoute({
+        method: 'post',
+        url: '/test',
+        async handler(ctx) {
+          ctx.res.body = ctx.req.data;
+        },
+      });
+
+      const request = (await chai.request(app.getHandler()).post('/test?limit=10&item=a&item=b').send({ hello: 'world' }));
+      const result = await request;
+      expect(result.body).to.deep.equal({
+        query: 'limit=10&item=a&item=b',
+        // body: undefined,
+        hooks: ['hook 1', 'hook 2'],
+      });
+    });
+
+    it('runs onParse Hooks', async () => {
+      const app = new Xeno();
+      app.addHook('onParse', async (ctx) => {
+        ctx.req.data = {};
+        ctx.req.data.query = ctx.req.query;
+        ctx.req.data.body = ctx.req.body;
+        ctx.req.data.hooks = [];
+      });
+      app.addHook('onParse', async (ctx) => {
+        ctx.req.data.hooks.push('hook 1');
+      });
+      app.addHook('onParse', async (ctx) => {
+        ctx.req.data.hooks.push('hook 2');
+      });
+      app.addRoute({
+        method: 'post',
+        url: '/test',
+        async handler(ctx) {
+          ctx.res.body = ctx.req.data;
+        },
+      });
+
+      const request = (await chai.request(app.getHandler()).post('/test?limit=10&item=a&item=b').send({ hello: 'world' }));
+      const result = await request;
+      expect(result.body).to.deep.equal({
+        query: {
+          limit: '10',
+          item: ['a', 'b'],
+        },
+        body: { hello: 'world' },
+        hooks: ['hook 1', 'hook 2'],
+      });
+    });
+
+    it('runs onRoute Hooks', async () => {
+      const app = new Xeno();
+      app.addHook('onRoute', async (ctx) => {
+        ctx.req.data = {};
+        ctx.req.data.route = ctx.req.route;
+        ctx.req.data.hooks = [];
+      });
+      app.addHook('onRoute', async (ctx) => {
+        ctx.req.data.hooks.push('hook 1');
+      });
+      app.addHook('onRoute', async (ctx) => {
+        ctx.req.data.hooks.push('hook 2');
+      });
+      app.addRoute({
+        method: 'post',
+        url: '/test',
+        meta: 'data',
+        async handler(ctx) {
+          ctx.res.body = ctx.req.data;
+        },
+      });
+
+      const request = (await chai.request(app.getHandler()).post('/test?limit=10&item=a&item=b').send({ hello: 'world' }));
+      const result = await request;
+      expect(result.body).to.deep.equal({
+        route: {
+          method: 'post',
+          path: '/test',
+          meta: 'data',
+        },
+        hooks: ['hook 1', 'hook 2'],
+      });
+    });
+
+    it('runs onSend Hooks', async () => {
+      const app = new Xeno();
+      app.addHook('onSend', async (ctx) => {
+        ctx.req.data = {
+          status: '',
+          headers: {},
+          hooks: [],
+        };
+        ctx.res.status(418);
+      });
+      app.addHook('onSend', async (ctx) => {
+        ctx.req.data.hooks.push('hook 1');
+        ctx.res.header('test-hdr', 'set in onSend');
+      });
+      app.addHook('onSend', async (ctx) => {
+        ctx.req.data.hooks.push('hook 2');
+        ctx.req.data.status = ctx.res.status();
+        ctx.req.data.headers['test-hdr'] = ctx.res.header('test-hdr');
+        ctx.res.body = ctx.req.data;
+      });
+
+      app.addRoute({
+        method: 'post',
+        url: '/test',
+        meta: 'data',
+        async handler(ctx) {
+          ctx.res.status(201);
+          ctx.res.header('test-hdr', 'set in handler');
+          ctx.res.body = ctx.req.data;
+        },
+      });
+
+      const request = (await chai.request(app.getHandler()).post('/test?limit=10&item=a&item=b').send({ hello: 'world' }));
+      const result = await request;
+      expect(result.status).to.equal(418);
+      expect(result.headers['test-hdr']).to.equal('set in onSend');
+      expect(result.body).to.deep.equal({
+        status: 418,
+        headers: {
+          'test-hdr': 'set in onSend',
+        },
+        hooks: ['hook 1', 'hook 2'],
+      });
+    });
+
+    it('runs onResponse Hooks', async () => {
+      const app = new Xeno();
+      app.addHook('onResponse', async (ctx) => {
+        ctx.req.data = {};
+      });
+      app.addHook('onResponse', async (ctx) => {
+        console.log('onResponse hook 1', 'ctx.res.sent', ctx.res.sent);
+      });
+      app.addHook('onResponse', async (ctx) => {
+        console.log('onResponse hook 2', 'ctx.res.status', ctx.res.status());
+      });
+
+      app.addRoute({
+        method: 'post',
+        url: '/test',
+        meta: 'data',
+        async handler() {
+          //
+        },
+      });
+
+      const request = (await chai.request(app.getHandler()).post('/test?limit=10&item=a&item=b').send({ hello: 'world' }));
+      const result = await request;
+      // console.log(result.headers);
+      expect(result.body).to.deep.equal({});
     });
   });
 });

@@ -14,7 +14,8 @@
   "author": "Vaid",
   "license": "ISC",
   "dependencies": {
-    "debug": "^4.3.2"
+    "debug": "^4.3.2",
+    "type-is": "^1.6.18"
   },
   "devDependencies": {
     "chai": "^4.3.4",
