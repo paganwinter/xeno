@@ -4,31 +4,46 @@ const http = require('http');
 
 const Xeno = require('..');
 
-const app = new Xeno();
+const app = new Xeno({
+  // querystringParser: (queryStr) => {},
+  errorHandler: async (err, ctx) => {
+    ctx.res.status(err.status || 500);
+    ctx.res.header('x-error-info', 'something');
+    ctx.res.body = err.message;
+  },
+});
 
-// app.onRequest((ctx) => {
-//   console.log('recevied request and created ctx');
-// });
+app.addHook('onRequest', async (ctx) => {
+  console.log('onRequest: received request and created ctx');
+  console.log(ctx.req.method, ctx.req.url, ctx.req.headers);
+});
 
-// app.onParse((ctx) => {
-//   console.log('request parsed');
-//   console.log(ctx.req);
-//   console.log(ctx.req.method, ctx.req.url);
-// });
+app.addHook('onParse', async (ctx) => {
+  console.log('onParse: request parsed');
+  console.log(ctx.req.query);
+  console.log(ctx.req.rawBody);
+  console.log(ctx.req.body);
+});
 
-// app.onRoute((ctx) => {
-//   console.log('route idetified');
-//   console.log('found route', ctx.req.route);
-// });
+app.addHook('onRoute', async (ctx) => {
+  console.log('onRoute: route and path params identified');
+  console.log('path params', ctx.req.params);
+  console.log('found route', ctx.req.route);
+});
 
-// app.onSend((ctx) => {
-//   console.log('response to be sent');
-// });
+app.addHook('onSend', async (ctx) => {
+  console.log('onSend: response to be sent');
+  console.log(ctx.res.status());
+  console.log(ctx.res.headers());
+  console.log(ctx.res.body);
+});
 
-// app.onResponse((ctx) => {
-//   console.log('response sent');
-//   console.log(ctx.res.status);
-// });
+app.addHook('onResponse', (ctx) => {
+  console.log('onResponse: response sent');
+  console.log(ctx.res.status());
+  console.log(ctx.res.headers());
+  console.log(ctx.res.body);
+});
 
 
 app.addRoute({

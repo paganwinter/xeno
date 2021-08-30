@@ -6,10 +6,12 @@ Super Minimal NodeJS Web Server Framework
   - [Usage](#usage)
     - [API](#api)
       - [`Xeno`](#xeno-1)
-      - [`app.addRoute({ method, url, handler, config })`:](#appaddroute-method-url-handler-config-)
+      - [`app.addRoute(options)`:](#appaddrouteoptions)
+      - [`app.addHook(hook, handler)`](#appaddhookhook-handler)
       - [`app.start(<http(s) module>, <http(s) opts>, port, callback)`](#appstarthttps-module-https-opts-port-callback)
       - [`Handler signature`](#handler-signature)
       - [`ctx`:](#ctx)
+      - [Hooks](#hooks)
 
 ## Install
 ```bash
@@ -23,57 +25,76 @@ Check [samples](/samples) for usage.
 #### `Xeno`
 Create an app instance.
 ```js
-const app = new Xeno();
+const app = new Xeno(options);
 ```
 
-#### `app.addRoute({ method, url, handler, config })`:
-Add a route to the application.<br />
+`options`
+```js
+{
+  errorHandler: async (err, ctx) => {} // function that will be called when any error occurs
+}
+```
 
-<!--
-#### `app.onRequest(handler)`
-Add a handler for `request received` event
+#### `app.addRoute(options)`:
+Add a route to the application.
 
-#### `app.onParse(handler)`
-Add a handler for `request parsed` event
+`options`
+```js
+{
+  method: 'post', // defaults to get when not provided
+  url :'test/:testId', // suppports `/static`, `/dynamic/:param`, `/wildcard*`
+  handler: async (ctx) => {}, // async handler function executed on route
+  some: 'route metadata', // arbitrary metadata to add to `ctx.req.route`
+  other: 'property',
+}
+```
 
-#### `app.onRoute(handler)`:
-Add a handler for `route identified` event
+#### `app.addHook(hook, handler)`
+Add a hook to be executed at different phases of request.
+```js
+hook : String // onRequest, onParse, onRoute, onSend, onResponse
+handler : async (ctx) => {} // async function
+```
 
-#### `app.onSend(handler)`:
-Add a handler for `sending response` event
-
-#### `app.onResponse(handler)`:
-Add a handler for `response sent` event
--->
 
 #### `app.start(<http(s) module>, <http(s) opts>, port, callback)`
-Start the server
+Start the server.
 
 #### `Handler signature`
-Handlers are called with a `ctx` object.
+Handlers (route and hook) are called with a `ctx` object.
 
 #### `ctx`:
 ```js
 ctx = {
   req: {
-    originalUrl: String,
-    method: String,
-    url | uri | path: String,
-    query: Object,
-    params: Object,
-    headers: Object,
-    body: [Object | String],
+    raw: <Raw NodeJS request>,
+    method: String, // request method
+    originalUrl: String, // request url (path + query string)
+    url | uri: String, // path component
+
+    search: String, // ?query=string
+    query: Object, // querystring as object
+    params: Object, // dynamic path params
+    headers: Object, // request headers
+
+    rawBody = [Buffer | String],
+    body: Any,
+
     route: { // metadata about the current route
       method: String,
       path: String,
-      config: Object,
+      *: Any,
     }
   },
   res: {
     status(Number), // set reponse status code
-    header(String, String), // set response header name and value
-    headers(Object), // set multiple response headers
+    header(String, String), // get or set response header name and value
+    headers(Object), // get all or set multiple response headers
+    removeHeader(String), // remove a response header
     body: [Object | String | Buffer | Stream], // set response body
   },
 }
 ```
+
+#### Hooks
+> TODO
